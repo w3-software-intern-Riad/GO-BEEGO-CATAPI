@@ -1,0 +1,186 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f5f5f5;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  
+  overflow-y: auto;
+  width: 700px;
+  height: 900px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  text-align: center;
+}
+
+.header {
+  display: flex;
+  justify-content: space-around;
+  padding: 10px;
+  background-color: #f8f8f8;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.nav-btn {
+  background: none;
+  border: none;
+  color: #333;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.nav-btn:hover {
+  color: #ff4500;
+}
+.cat-image {
+  height: 700px;
+  margin-top: 5px;
+  border-radius: 10px;
+  width: 100%;
+}
+#cat-image {
+  width: 100%;
+  border-radius: 15px;
+  height: 700px;
+  object-fit: cover;
+}
+.actions{
+  margin-top: 10px;
+}
+.favorites-container {
+  display: flex;
+  flex-wrap: wrap; /* Allow items to wrap to the next line */
+  overflow-y: auto; /* Enable vertical scrolling */
+  overflow-x: hidden; /* Hide horizontal overflow */
+  width: 100%; /* Adjust as needed */
+  height: 100%; /* Set a fixed height for the container */
+  padding: 10px; /* Optional padding */
+  box-sizing: border-box; /* Ensure padding is included in width/height */
+ 
+}
+
+.favorite-cat-image {
+  flex: 1 1 calc(33.333% - 20px); /* 3 items per row, minus margin */
+  height: 200px; /* Maintain aspect ratio */
+  margin: 10px; /* Add margin around each image */
+  border: 2px solid #e86060; /* Optional border */
+  object-fit: cover;
+
+  transition: 0.5s;
+}
+.favorite-cat-image:hover {
+  transform: scale(1.1); /* Slightly enlarge the image */
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3); /* Add shadow */
+  border-color: #ff6f61; /* Change border color on hover */
+}
+
+.breeds-section {
+ 
+  margin-top: 10px;
+}
+
+.dropdown {
+  padding: 10px;
+  margin-top: 20px;
+}
+
+.breed-info {
+  height: 100vh;
+  margin-top: 20px;
+  text-align: center;
+}
+
+.image-slider {
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+  margin: 20px auto;
+  overflow: hidden;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+.image-slider img {
+  width: 100%;
+  height: auto;
+  display: none;
+}
+.image-slider img.active {
+  display: block;
+}
+.slider-navigation {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 5px;
+}
+.slider-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+}
+.slider-dot.active {
+  background-color: #fff;
+}
+.breed-info {
+  margin-top: 20px;
+  background-color: #f9f9f9;
+  padding: 20px;
+  border-radius: 10px;
+}
+#breed-description {
+  font-size: 16px;
+  line-height: 1.5;
+  color: #333;
+  margin-bottom: 15px;
+}
+.wiki-btn {
+  display: none;
+  padding: 10px 20px;
+  background-color: #4caf50;
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+}
+.wiki-btn:hover {
+  background-color: #45a049;
+}
+.slider-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+  z-index: 100;
+}
+.prev-btn {
+  left: 10px;
+}
+.next-btn {
+  right: 10px;
+}
+.images-container {
+  
+  height: 300px;
+}
+p{
+  padding: 10px;
+  overflow-y: scroll;
+}
