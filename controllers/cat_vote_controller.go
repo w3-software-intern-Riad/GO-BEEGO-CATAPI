@@ -21,57 +21,44 @@ type Vote struct {
 	Value   int    `json:"value"`
 }
 
+// PostVote handles the voting process
 func (v *VoteController) PostVote() {
-
-	// Initialize an instance of the Vote struct
 	var vote Vote
 
-	// Parse the JSON request body into the Vote struct
-	err := json.Unmarshal(v.Ctx.Input.RequestBody, &vote)
-	if err != nil {
-		fmt.Println("Error parsing request:", err)
-		v.Ctx.Output.SetStatus(400)
-		v.Data["json"] = map[string]string{"error": "Invalid request"}
-		v.ServeJSON()
+	// Parse JSON request body
+	if err := json.Unmarshal(v.Ctx.Input.RequestBody, &vote); err != nil {
+		v.handleError("Invalid request", err, 400)
 		return
 	}
 
-	// Get API key from config
 	apiKey, err := beego.AppConfig.String("apikey")
 	if err != nil {
-		fmt.Println("Error getting API key:", err)
-		v.Ctx.Output.SetStatus(500)
-		v.Data["json"] = map[string]string{"error": "Server configuration error"}
-		v.ServeJSON()
+		v.handleError("Server configuration error", err, 500)
 		return
 	}
-
 
 	baseUrl, err := beego.AppConfig.String("baseUrl")
 	if err != nil {
-		fmt.Println("Error getting baseUrl :", err)
-		v.Ctx.Output.SetStatus(500)
-		v.Data["json"] = map[string]string{"error": "Server configuration error"}
-		v.ServeJSON()
+		v.handleError("Server configuration error", err, 500)
 		return
 	}
 
-	// Prepare channel to receive response
 	responseChan := make(chan map[string]interface{})
+	defer close(responseChan)
 
-	// Make the API call in a separate goroutine
+	// Make API call in a goroutine
 	go func() {
+		defer close(responseChan)
+		
 		apiURL := fmt.Sprintf("%s/v1/votes", baseUrl)
 		jsonData, err := json.Marshal(vote)
 		if err != nil {
-			fmt.Println("Error marshalling vote data:", err)
 			responseChan <- map[string]interface{}{"error": "Internal server error"}
 			return
 		}
 
 		req, err := http.NewRequest("POST", apiURL, bytes.NewBuffer(jsonData))
 		if err != nil {
-			fmt.Println("Error creating HTTP request:", err)
 			responseChan <- map[string]interface{}{"error": "Internal server error"}
 			return
 		}
@@ -81,7 +68,6 @@ func (v *VoteController) PostVote() {
 		client := &http.Client{Timeout: 10 * time.Second}
 		resp, err := client.Do(req)
 		if err != nil {
-			fmt.Println("Error making HTTP request:", err)
 			responseChan <- map[string]interface{}{"error": "Failed to connect to external API"}
 			return
 		}
@@ -89,15 +75,12 @@ func (v *VoteController) PostVote() {
 
 		body, err := io.ReadAll(resp.Body)
 		if err != nil {
-			fmt.Println("Error reading HTTP response:", err)
 			responseChan <- map[string]interface{}{"error": "Failed to read external API response"}
 			return
 		}
-		// Convert byte array to string
 
 		var apiResponse map[string]interface{}
 		if err := json.Unmarshal(body, &apiResponse); err != nil {
-			fmt.Println("Error parsing JSON response:", err)
 			responseChan <- map[string]interface{}{"error": "Failed to parse external API response"}
 			return
 		}
@@ -105,10 +88,23 @@ func (v *VoteController) PostVote() {
 		responseChan <- apiResponse
 	}()
 
-	// Receive the response from the channel
+	// Handle API response
 	apiResponse := <-responseChan
+	if errorResp, ok := apiResponse["error"].(string); ok {
+		v.handleError(errorResp, nil, 500)
+		return
+	}
 
-	// Send the API response back to the client
 	v.Data["json"] = apiResponse
+	v.ServeJSON()
+}
+
+// handleError is a helper function to send error responses
+func (v *VoteController) handleError(message string, err error, statusCode int) {
+	if err != nil {
+		fmt.Printf("Error: %v\n", err)
+	}
+	v.Ctx.Output.SetStatus(statusCode)
+	v.Data["json"] = map[string]string{"error": message}
 	v.ServeJSON()
 }

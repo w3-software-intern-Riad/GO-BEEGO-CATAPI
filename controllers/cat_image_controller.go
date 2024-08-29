@@ -12,12 +12,9 @@ import (
 type CatController struct {
 	beego.Controller
 }
-
 type GetCatImagesController struct {
 	beego.Controller
 }
-
-// CatImage represents the structure of the response from the Cat API
 type CatImage struct {
 	ID     string `json:"id"`
 	URL    string `json:"url"`
@@ -25,52 +22,50 @@ type CatImage struct {
 	Height int    `json:"height"`
 }
 
-// GetCatImage is the handler function for the API endpoint using Go channels
 func (c *CatController) GetCatImage() {
-	// Channel to receive the result of the API call
 	resultChan := make(chan []CatImage)
 	errorChan := make(chan error)
+	defer close(resultChan)
+	defer close(errorChan)
+
 	baseUrl, err := beego.AppConfig.String("baseUrl")
 	if err != nil {
-		fmt.Println("Error getting baseUrl :", err)
-		c.Ctx.Output.SetStatus(500)
-		c.Data["json"] = map[string]string{"error": "Server configuration error"}
-		c.ServeJSON()
+		c.handleError("Server configuration error", err, 500)
 		return
 	}
-	// Start a goroutine to fetch the cat image
+
 	go func() {
-		apiURL := fmt.Sprintf("%s/v1/images/search?size=med&mime_types=jpg&format=json&has_breeds=false&order=RANDOM&page=0&limit=1",baseUrl)
+		apiURL := fmt.Sprintf("%s/v1/images/search?size=med&mime_types=jpg&format=json&has_breeds=false&order=RANDOM&page=0&limit=1", baseUrl)
 		apiKey, err := beego.AppConfig.String("apikey")
 		if err != nil {
-			errorChan <- fmt.Errorf("failed to load API key")
+			errorChan <- fmt.Errorf("failed to load API key: %w", err)
 			return
 		}
 
 		req, err := http.NewRequest("GET", apiURL, nil)
 		if err != nil {
-			errorChan <- fmt.Errorf("failed to create request")
+			errorChan <- fmt.Errorf("failed to create request: %w", err)
 			return
 		}
-
 		req.Header.Set("x-api-key", apiKey)
+
 		client := &http.Client{}
 		resp, err := client.Do(req)
 		if err != nil {
-			errorChan <- fmt.Errorf("failed to fetch cat image")
+			errorChan <- fmt.Errorf("failed to fetch cat image: %w", err)
 			return
 		}
 		defer resp.Body.Close()
 
 		body, err := io.ReadAll(resp.Body)
 		if err != nil {
-			errorChan <- fmt.Errorf("failed to read response body")
+			errorChan <- fmt.Errorf("failed to read response body: %w", err)
 			return
 		}
 
 		var catImages []CatImage
 		if err := json.Unmarshal(body, &catImages); err != nil {
-			errorChan <- fmt.Errorf("failed to parse response")
+			errorChan <- fmt.Errorf("failed to parse response: %w", err)
 			return
 		}
 
@@ -79,53 +74,41 @@ func (c *CatController) GetCatImage() {
 			return
 		}
 
-		// Send the result back through the channel
 		resultChan <- catImages
 	}()
 
-	// Wait for the result or error from the channels
 	select {
 	case catImages := <-resultChan:
-		// Successfully received the cat image
 		c.Ctx.Output.SetStatus(http.StatusOK)
 		c.Ctx.Output.Header("Content-Type", "application/json")
 		c.Data["json"] = catImages[0]
 	case err := <-errorChan:
-		// An error occurred
-		c.Ctx.Output.SetStatus(http.StatusInternalServerError)
-		c.Data["json"] = map[string]string{"error": err.Error()}
+		c.handleError(err.Error(), err, http.StatusInternalServerError)
 	}
-
-	// Send the JSON response
 	c.ServeJSON()
 }
 
-// GetCatImages fetches cat image URLs for a specific breed using a channel.
 func (gci *GetCatImagesController) GetCatImages() {
-	// Define channels for responses and errors
 	responseChan := make(chan []string)
 	errorChan := make(chan error)
+	defer close(responseChan)
+	defer close(errorChan)
 
-	// Get breed_id from query parameters
 	breedID := gci.Ctx.Input.Param(":breed_id")
-
-	
 	if breedID == "" {
 		gci.Data["json"] = map[string]string{"error": "breed_id is required"}
 		gci.ServeJSON()
 		return
 	}
+
 	baseUrl, err := beego.AppConfig.String("baseUrl")
 	if err != nil {
-		fmt.Println("Error getting baseUrl :", err)
-		gci.Ctx.Output.SetStatus(500)
-		gci.Data["json"] = map[string]string{"error": "Server configuration error"}
-		gci.ServeJSON()
+		gci.handleError("Server configuration error", err, 500)
 		return
 	}
-	// Fetch cat image URLs in a goroutine
+
 	go func() {
-		apiURL := fmt.Sprintf("%s/v1/images/search?limit=5&breed_ids=%s",baseUrl, breedID)
+		apiURL := fmt.Sprintf("%s/v1/images/search?limit=5&breed_ids=%s", baseUrl, breedID)
 
 		resp, err := http.Get(apiURL)
 		if err != nil {
@@ -146,7 +129,6 @@ func (gci *GetCatImagesController) GetCatImages() {
 			return
 		}
 
-		// Extract image URLs
 		var urls []string
 		for _, img := range images {
 			if url, ok := img["url"].(string); ok {
@@ -157,13 +139,34 @@ func (gci *GetCatImagesController) GetCatImages() {
 		responseChan <- urls
 	}()
 
-	// Select to wait for either the response or an error
 	select {
 	case err := <-errorChan:
-		gci.Data["json"] = map[string]string{"error": err.Error()}
+		gci.handleError(err.Error(), err, http.StatusInternalServerError)
 	case urls := <-responseChan:
 		gci.Data["json"] = urls
 	}
 
+	gci.ServeJSON()
+}
+
+func (c *CatController) handleError(message string, err error, statusCode int) {
+	if err != nil {
+		fmt.Println("Error:", err)  // Use your preferred logging mechanism
+	}
+	c.Ctx.Output.SetStatus(statusCode)
+	c.Data["json"] = map[string]string{"error": message}
+	c.ServeJSON()
+}
+
+
+
+
+
+func (gci *GetCatImagesController) handleError(message string, err error, statusCode int) {
+	if err != nil {
+		fmt.Println("Error:", err)  // Use your preferred logging mechanism
+	}
+	gci.Ctx.Output.SetStatus(statusCode)
+	gci.Data["json"] = map[string]string{"error": message}
 	gci.ServeJSON()
 }
