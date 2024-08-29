@@ -6,9 +6,12 @@ import (
 )
 
 func init() {
+	//web routes
 	beego.Router("/", &controllers.MainController{})
 	beego.Router("/get-favorite", &controllers.GetAllFavoriteController{})
 	beego.Router("/get-breeds", &controllers.GetBreedsControllerWeb{})
+
+	//api routes
 	beego.Router("/cat-images/:breed_id", &controllers.GetCatImagesController{}, "get:GetCatImages")
 	beego.Router("/cat", &controllers.CatController{}, "get:GetCatImage")
 	beego.Router("/vote", &controllers.VoteController{}, "post:PostVote")
