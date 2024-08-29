@@ -109,7 +109,7 @@ func (gci *GetCatImagesController) GetCatImages() {
 	// Get breed_id from query parameters
 	breedID := gci.Ctx.Input.Param(":breed_id")
 
-	fmt.Println("breed_id : ",breedID)
+	
 	if breedID == "" {
 		gci.Data["json"] = map[string]string{"error": "breed_id is required"}
 		gci.ServeJSON()
