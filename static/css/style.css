@@ -191,3 +191,28 @@ p {
   padding: 10px;
   overflow-y: scroll;
 }
+/* CSS for dropdown list */
+.dropdown-list {
+  position: absolute;
+  background-color: white;
+  border: 1px solid #ccc;
+  max-height: 200px;
+  overflow-y: auto;
+  
+  margin-left: 18%;
+  display: none;
+  z-index: 1;
+}
+
+.dropdown-list div {
+  padding: 8px;
+  cursor: pointer;
+}
+
+.dropdown-list div:hover {
+  background-color: #f0f0f0;
+}
+/* Adjust the position of the input field */
+.dropdown {
+  position: relative;
+}

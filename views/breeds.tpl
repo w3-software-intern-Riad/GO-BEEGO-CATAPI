@@ -16,10 +16,9 @@
         </div>
 
         <div class="breeds-section">
-            <label for="breeds-dropdown">Select a Cat Breed:</label>
-            <select id="breeds-dropdown" class="dropdown">
-                <option value="">--Select a Breed--</option>
-            </select>
+            <label for="breeds-input">Select a Cat Breed:</label>
+            <input type="text" id="breeds-input" class="dropdown" placeholder="Type to search...">
+            <div id="breeds-list" class="dropdown-list"></div>
 
             <div class="breed-info">
                 <div class="image-slider" id="image-slider">
