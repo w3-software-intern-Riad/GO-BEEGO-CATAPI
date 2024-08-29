@@ -55,9 +55,17 @@ func (f *FavoriteController) PostFavorite() {
 		f.ServeJSON()
 		return
 	}
+	baseUrl, err := beego.AppConfig.String("baseUrl")
+	if err != nil {
+		fmt.Println("Error getting baseUrl :", err)
+		f.Ctx.Output.SetStatus(500)
+		f.Data["json"] = map[string]string{"error": "Server configuration error"}
+		f.ServeJSON()
+		return
+	}
 	responseChan := make(chan map[string]interface{})
 	go func() {
-		apiURL := "https://api.thecatapi.com/v1/favourites"
+		apiURL := fmt.Sprintf("%s/v1/favourites", baseUrl)
 		jsonData, err := json.Marshal(favorite)
 		if err != nil {
 			fmt.Println("Error marshalling vote data:", err)
@@ -107,8 +115,16 @@ func (f *FavoriteController) PostFavorite() {
 func (gf *GetFavController) GetAllFav() {
 	responseChan := make(chan []ImageResponse)
 	errorChan := make(chan error)
+	baseUrl, err := beego.AppConfig.String("baseUrl")
+	if err != nil {
+		fmt.Println("Error getting baseUrl :", err)
+		gf.Ctx.Output.SetStatus(500)
+		gf.Data["json"] = map[string]string{"error": "Server configuration error"}
+		gf.ServeJSON()
+		return
+	}
 	go func() {
-		apiURL := "https://api.thecatapi.com/v1/favourites"
+		apiURL := fmt.Sprintf("%s/v1/favourites", baseUrl)
 		apiKey, err := beego.AppConfig.String("apikey")
 		if err != nil {
 			errorChan <- fmt.Errorf("failed to load API key: %v", err)

@@ -17,6 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     const imgElement = document.createElement("img");
                     imgElement.src = image.image.url; // Use the correct URL
                     imgElement.alt = "Favorite Cat Image";
+                    
                     imgElement.className = "favorite-cat-image"; // Add a class for styling
                     favoritesContainer.appendChild(imgElement);
                 }

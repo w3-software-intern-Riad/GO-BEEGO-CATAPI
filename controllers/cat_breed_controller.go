@@ -20,9 +20,17 @@ func (gb *GetBreedsController) GetAllBreeds() {
 	// Define a channel to handle responses
 	responseChan := make(chan []map[string]interface{})
 	errorChan := make(chan error)
+	baseUrl, err := beego.AppConfig.String("baseUrl")
+	if err != nil {
+		fmt.Println("Error getting baseUrl :", err)
+		gb.Ctx.Output.SetStatus(500)
+		gb.Data["json"] = map[string]string{"error": "Server configuration error"}
+		gb.ServeJSON()
+		return
+	}
 
 	go func() {
-		apiURL := "https://api.thecatapi.com/v1/breeds"
+		apiURL := fmt.Sprintf("%s/v1/breeds",baseUrl)
 
 		req, err := http.NewRequest("GET", apiURL, nil)
 		if err != nil {

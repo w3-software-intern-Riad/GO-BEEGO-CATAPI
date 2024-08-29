@@ -26,8 +26,6 @@ func (v *VoteController) PostVote() {
 	// Initialize an instance of the Vote struct
 	var vote Vote
 
-	// Print the request body for debugging
-
 	// Parse the JSON request body into the Vote struct
 	err := json.Unmarshal(v.Ctx.Input.RequestBody, &vote)
 	if err != nil {
@@ -48,12 +46,22 @@ func (v *VoteController) PostVote() {
 		return
 	}
 
+
+	baseUrl, err := beego.AppConfig.String("baseUrl")
+	if err != nil {
+		fmt.Println("Error getting baseUrl :", err)
+		v.Ctx.Output.SetStatus(500)
+		v.Data["json"] = map[string]string{"error": "Server configuration error"}
+		v.ServeJSON()
+		return
+	}
+
 	// Prepare channel to receive response
 	responseChan := make(chan map[string]interface{})
 
 	// Make the API call in a separate goroutine
 	go func() {
-		apiURL := "https://api.thecatapi.com/v1/votes"
+		apiURL := fmt.Sprintf("%s/v1/votes", baseUrl)
 		jsonData, err := json.Marshal(vote)
 		if err != nil {
 			fmt.Println("Error marshalling vote data:", err)

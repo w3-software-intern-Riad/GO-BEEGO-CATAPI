@@ -20,10 +20,10 @@
             <img src="" alt="Cat Image" id="cat-image">
         </div>
         <div class="actions">
-            <button class="love-btn" style="font-size:24px"> <i class="fa fa-heart"></i></button>
+            <button class="love-btn" > <i class="fa fa-heart"></i></button>
             
-            <button class="like-btn" style="font-size:24px">👍</button>
-            <button class="dislike-btn" style="font-size:24px">👎</button>
+            <button class="like-btn" >👍</button>
+            <button class="dislike-btn" >👎</button>
         </div>
     </div>
 

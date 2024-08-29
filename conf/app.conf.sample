@@ -2,3 +2,4 @@ appname = catProject
 httpport = 8080
 runmode = dev
 apikey=live_Eqf9jEDFG5KJPpGGLQXfpB9cZPY60CcGi7BTSQZeyhWnvTava1wDTGKLv47RPf9T
+baseUrl=https://api.thecatapi.com

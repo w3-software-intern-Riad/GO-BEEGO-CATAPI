@@ -30,10 +30,17 @@ func (c *CatController) GetCatImage() {
 	// Channel to receive the result of the API call
 	resultChan := make(chan []CatImage)
 	errorChan := make(chan error)
-
+	baseUrl, err := beego.AppConfig.String("baseUrl")
+	if err != nil {
+		fmt.Println("Error getting baseUrl :", err)
+		c.Ctx.Output.SetStatus(500)
+		c.Data["json"] = map[string]string{"error": "Server configuration error"}
+		c.ServeJSON()
+		return
+	}
 	// Start a goroutine to fetch the cat image
 	go func() {
-		apiURL := "https://api.thecatapi.com/v1/images/search?size=med&mime_types=jpg&format=json&has_breeds=false&order=RANDOM&page=0&limit=1"
+		apiURL := fmt.Sprintf("%s/v1/images/search?size=med&mime_types=jpg&format=json&has_breeds=false&order=RANDOM&page=0&limit=1",baseUrl)
 		apiKey, err := beego.AppConfig.String("apikey")
 		if err != nil {
 			errorChan <- fmt.Errorf("failed to load API key")
@@ -108,10 +115,17 @@ func (gci *GetCatImagesController) GetCatImages() {
 		gci.ServeJSON()
 		return
 	}
-
+	baseUrl, err := beego.AppConfig.String("baseUrl")
+	if err != nil {
+		fmt.Println("Error getting baseUrl :", err)
+		gci.Ctx.Output.SetStatus(500)
+		gci.Data["json"] = map[string]string{"error": "Server configuration error"}
+		gci.ServeJSON()
+		return
+	}
 	// Fetch cat image URLs in a goroutine
 	go func() {
-		apiURL := fmt.Sprintf("https://api.thecatapi.com/v1/images/search?limit=5&breed_ids=%s", breedID)
+		apiURL := fmt.Sprintf("%s/v1/images/search?limit=5&breed_ids=%s",baseUrl, breedID)
 
 		resp, err := http.Get(apiURL)
 		if err != nil {
