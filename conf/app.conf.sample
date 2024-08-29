@@ -1,0 +1,5 @@
+appname = (eg. catProject)
+httpport = (eg. 8080 )
+runmode = (eg. dev)
+apikey=your api key
+baseUrl=(eg. https://api.thecatapi.com)
